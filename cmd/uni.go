@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/fitzix/sniper-bot/consts"
 	"github.com/fitzix/sniper-bot/runner"
 	"github.com/spf13/cobra"
 )
@@ -11,7 +10,7 @@ var uniCmd = &cobra.Command{
 	Use:   "uni",
 	Short: "sniper on uniswap v2",
 	Run: func(cmd *cobra.Command, args []string) {
-		runner.NewEthRunner().SniperUniCake(consts.ChainTypeEth)
+		runner.NewEthRunner().SniperUniCake(chainType, quickMode)
 	},
 }
 
