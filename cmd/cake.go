@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/fitzix/sniper-bot/runner"
+	"github.com/leagos/sniper-bot/runner"
 	"github.com/spf13/cobra"
 )
 

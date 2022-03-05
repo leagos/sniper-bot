@@ -1,4 +1,4 @@
-module github.com/fitzix/sniper-bot
+module github.com/leagos/sniper-bot
 
 go 1.17
 

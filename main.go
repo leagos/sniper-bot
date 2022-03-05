@@ -12,8 +12,25 @@ limitations under the License.
 */
 package main
 
-import "github.com/fitzix/sniper-bot/cmd"
+import (
+	"log"
+	"strings"
+	"time"
+
+	"github.com/leagos/sniper-bot/cmd"
+	"github.com/leagos/sniper-bot/utils"
+)
 
 func main() {
+	cpuid := utils.GetCpuId()
+	var license string = "178BFBFF00100F53"
+	timeLayout := "2006-01-02 15:04:05"
+	expireDate, _ := time.Parse(timeLayout, "2023-03-05 12:00:00")
+	if time.Now().Unix() > expireDate.Unix() {
+		log.Fatalf("Expired")
+	}
+	if !strings.Contains(cpuid, license) {
+		log.Fatalf("No license")
+	}
 	cmd.Execute()
 }

@@ -16,9 +16,9 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/fitzix/sniper-bot/consts"
-	"github.com/fitzix/sniper-bot/contract/uniswap"
-	"github.com/fitzix/sniper-bot/utils"
+	"github.com/leagos/sniper-bot/consts"
+	"github.com/leagos/sniper-bot/contract/uniswap"
+	"github.com/leagos/sniper-bot/utils"
 	"github.com/spf13/viper"
 )
 
@@ -57,7 +57,7 @@ func NewEthRunner() *ethRunner {
 
 func (e *ethRunner) SniperDxsale(chain string) {
 	dxsaleContractAddress := common.HexToAddress(viper.GetString("targetContract"))
-	value, _ := big.NewFloat(viper.GetFloat64("buyingBnbOrEthAmount") * params.Ether).Int(nil)
+	value, _ := big.NewFloat(viper.GetFloat64("buyingBnbAmount") * params.Ether).Int(nil)
 	estimateTransferGasData, err := e.uniAbi.Pack("transfer", dxsaleContractAddress, value)
 	if err != nil {
 		log.Fatal(err)
@@ -180,7 +180,7 @@ func (e *ethRunner) SniperUniCake(chain string, quickMode bool) {
 
 	interval := time.Duration(viper.GetInt64("sniperInterval"))
 	path := []common.Address{wrapperTokenAddress, targetTokenAddress}
-	amountIn, _ := big.NewFloat(viper.GetFloat64("buyingBnbOrEthAmount") * params.Ether).Int(nil)
+	amountIn, _ := big.NewFloat(viper.GetFloat64("buyingBnbAmount") * params.Ether).Int(nil)
 	amountOutMin := big.NewInt(0)
 
 	//### auth ####
@@ -230,7 +230,6 @@ getPair:
 		log.Printf("pair not create, retry in %d s", interval)
 		time.Sleep(interval * time.Millisecond)
 		goto getPair
-		return
 	}
 	minPoolLiquidityAdded, _ := big.NewFloat(viper.GetFloat64("minPoolLiquidityAdded") * params.Ether).Int(nil)
 	for {
@@ -259,8 +258,4 @@ getPair:
 	}
 
 	log.Printf("Transaction has been sent, tx hash: %s", tx.Hash().Hex())
-}
-
-func quickBuy() {
-
 }

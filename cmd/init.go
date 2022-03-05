@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/fitzix/sniper-bot/consts"
+	"github.com/leagos/sniper-bot/consts"
 	"github.com/spf13/cobra"
 )
 
