@@ -37,7 +37,7 @@ func NewEthRunner() *ethRunner {
 
 	privateKey, err := crypto.HexToECDSA(viper.GetString("privateKey"))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("privateKey error:", err)
 	}
 
 	publicKeyECDSA, ok := privateKey.Public().(*ecdsa.PublicKey)
