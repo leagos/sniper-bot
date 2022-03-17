@@ -11,7 +11,7 @@ var cakeCmd = &cobra.Command{
 	Short: "sniper on pancake",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		runner.NewEthRunner().SniperUniCake(chainType, quickMode)
+		runner.NewEthRunner().SniperUniCake(chainType, frontRun)
 	},
 }
 

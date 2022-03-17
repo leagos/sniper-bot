@@ -1,18 +1,15 @@
 package runner
 
 import (
-	"context"
 	"crypto/ecdsa"
 	"log"
 	"math/big"
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/params"
@@ -28,6 +25,8 @@ type ethRunner struct {
 	uniAbi       abi.ABI
 	ethClientMap map[string]*ethclient.Client
 }
+
+var FromAddr common.Address
 
 func NewEthRunner() *ethRunner {
 	uniAbi, err := abi.JSON(strings.NewReader(uniswap.UniswapV2ABI))
@@ -46,6 +45,7 @@ func NewEthRunner() *ethRunner {
 	}
 
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	FromAddr = fromAddress
 
 	return &ethRunner{
 		privateKey:   privateKey,
@@ -55,71 +55,71 @@ func NewEthRunner() *ethRunner {
 	}
 }
 
-func (e *ethRunner) SniperDxsale(chain string) {
-	dxsaleContractAddress := common.HexToAddress(viper.GetString("targetContract"))
-	value, _ := big.NewFloat(viper.GetFloat64("buyingBnbAmount") * params.Ether).Int(nil)
-	estimateTransferGasData, err := e.uniAbi.Pack("transfer", dxsaleContractAddress, value)
-	if err != nil {
-		log.Fatal(err)
-	}
+//func (e *ethRunner) SniperDxsale(chain string) {
+//	dxsaleContractAddress := common.HexToAddress(viper.GetString("targetContract"))
+//	value, _ := big.NewFloat(viper.GetFloat64("buyingBnbAmount") * params.Ether).Int(nil)
+//	estimateTransferGasData, err := e.uniAbi.Pack("transfer", dxsaleContractAddress, value)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	ctx := context.Background()
+//
+//	gas, err := e.getClient(chain).EstimateGas(ctx, ethereum.CallMsg{
+//		To:   &dxsaleContractAddress,
+//		Data: estimateTransferGasData,
+//	})
+//
+//	if err != nil {
+//		if err.Error() != "execution reverted" {
+//			log.Fatal(err)
+//		}
+//		interval := viper.GetInt64("sniperInterval")
+//		log.Printf("contract not active, retry in %d ms", interval)
+//		time.AfterFunc(time.Duration(interval)*time.Millisecond, func() {
+//			e.SniperDxsale(chain)
+//		})
+//		return
+//	}
+//
+//	if viper.GetUint64("gasLimit") < gas {
+//		log.Println("config gas limit less than estimate gas ", gas, "auto set to estimate gasLimit")
+//		viper.Set("gasLimit", gas)
+//	}
+//
+//	log.Println("EstimateGas", gas, "ready to transfer")
+//
+//	e.transfer(ctx, chain, dxsaleContractAddress, value)
+//}
 
-	ctx := context.Background()
-
-	gas, err := e.getClient(chain).EstimateGas(ctx, ethereum.CallMsg{
-		To:   &dxsaleContractAddress,
-		Data: estimateTransferGasData,
-	})
-
-	if err != nil {
-		if err.Error() != "execution reverted" {
-			log.Fatal(err)
-		}
-		interval := viper.GetInt64("sniperInterval")
-		log.Printf("contract not active, retry in %d ms", interval)
-		time.AfterFunc(time.Duration(interval)*time.Millisecond, func() {
-			e.SniperDxsale(chain)
-		})
-		return
-	}
-
-	if viper.GetUint64("gasLimit") < gas {
-		log.Println("config gas limit less than estimate gas ", gas, "auto set to estimate gasLimit")
-		viper.Set("gasLimit", gas)
-	}
-
-	log.Println("EstimateGas", gas, "ready to transfer")
-
-	e.transfer(ctx, chain, dxsaleContractAddress, value)
-}
-
-func (e *ethRunner) transfer(ctx context.Context, chain string, toAddress common.Address, value *big.Int) {
-
-	nonce, err := e.getClient(chain).PendingNonceAt(ctx, e.fromAddress)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	println(nonce)
-
-	tx, err := types.SignNewTx(e.privateKey, types.LatestSignerForChainID(big.NewInt(consts.ChainIdMap[chain])), &types.LegacyTx{
-		Nonce:    nonce,
-		GasPrice: big.NewInt(viper.GetInt64("gasPrice") * params.GWei),
-		Gas:      viper.GetUint64("gasLimit"),
-		To:       &toAddress,
-		Value:    value,
-	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = e.getClient(chain).SendTransaction(ctx, tx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Transaction has been sent, tx hash: %s", tx.Hash().Hex())
-}
+//func (e *ethRunner) transfer(ctx context.Context, chain string, toAddress common.Address, value *big.Int) {
+//
+//	nonce, err := e.getClient(chain).PendingNonceAt(ctx, e.fromAddress)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	println(nonce)
+//
+//	tx, err := types.SignNewTx(e.privateKey, types.LatestSignerForChainID(big.NewInt(consts.ChainIdMap[chain])), &types.LegacyTx{
+//		Nonce:    nonce,
+//		GasPrice: big.NewInt(viper.GetInt64("gasPrice") * params.GWei),
+//		Gas:      viper.GetUint64("gasLimit"),
+//		To:       &toAddress,
+//		Value:    value,
+//	})
+//
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	err = e.getClient(chain).SendTransaction(ctx, tx)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	log.Printf("Transaction has been sent, tx hash: %s", tx.Hash().Hex())
+//}
 
 func (e *ethRunner) getClient(chain string) *ethclient.Client {
 	client, ok := e.ethClientMap[chain]
@@ -161,7 +161,7 @@ func (e *ethRunner) getClient(chain string) *ethclient.Client {
 	return client
 }
 
-func (e *ethRunner) SniperUniCake(chain string, quickMode bool) {
+func (e *ethRunner) SniperUniCake(chain string, frontRun bool) {
 	wrapperTokenAddress := consts.UniSwapWrapperTokenContractMap[chain]
 	targetTokenAddress := common.HexToAddress(viper.GetString("targetContract"))
 	log.Printf("token address %s", targetTokenAddress)
@@ -191,32 +191,35 @@ func (e *ethRunner) SniperUniCake(chain string, quickMode bool) {
 	auth.Value = amountIn
 	auth.GasLimit = viper.GetUint64("gasLimit")
 	auth.GasPrice = big.NewInt(viper.GetInt64("gasPrice") * params.GWei)
-	log.Println(quickMode)
-	if quickMode {
-		auth.NoSend = true
-		tx, err := router.SwapExactETHForTokens(auth, amountOutMin, path, e.fromAddress, big.NewInt(time.Now().Add(2*time.Minute).Unix()))
+
+	if frontRun == true {
+		targetToken, err := uniswap.NewUniswapV2(targetTokenAddress, e.getClient(chain))
 		if err != nil {
 			log.Fatal(err)
 		}
-		to := consts.UniSwapRouterContractMap[chain]
-	estimat:
-		_, err = e.getClient(chain).EstimateGas(context.Background(), ethereum.CallMsg{
-			From:  e.fromAddress,
-			To:    &to,
-			Data:  tx.Data(),
-			Value: amountIn,
-		})
+		tokenBalance, err := targetToken.BalanceOf(nil, FromAddr)
 		if err != nil {
-			log.Printf("estimate GasLimit failed, retry in %d s", interval)
+			log.Fatal(err)
+		}
+		log.Printf("Init token balance %s", utils.WeiToEtherFloatByDecimals(9, tokenBalance).String())
+		for {
+			nowBalance, err := targetToken.BalanceOf(nil, FromAddr)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Printf("Now token balance %s", utils.WeiToEtherFloatByDecimals(9, nowBalance).String())
+			buyAmount := new(big.Int).Sub(nowBalance, tokenBalance)
+			if buyAmount.Cmp(big.NewInt(0)) >= 1 {
+				log.Printf("Buy amount %s, over ------", utils.WeiToEtherFloatByDecimals(9, buyAmount).String())
+				return
+			}
+			tx, err := router.SwapExactETHForTokens(auth, amountOutMin, path, e.fromAddress, big.NewInt(time.Now().Add(2*time.Minute).Unix()))
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Printf("Transaction has been sent, tx hash: %s", tx.Hash().Hex())
 			time.Sleep(interval * time.Millisecond)
-			goto estimat
 		}
-		err = e.getClient(chain).SendTransaction(context.Background(), tx)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("Transaction has been sent, tx hash: %s", tx.Hash().Hex())
-		return
 	}
 
 getPair:

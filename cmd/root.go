@@ -17,7 +17,7 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 }
 var chainType string
-var quickMode bool
+var frontRun bool
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -30,7 +30,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&chainType, "chain", "c", "bsc", "chain type")
-	rootCmd.PersistentFlags().BoolVarP(&quickMode, "quick", "q", false, "quick mode")
+	rootCmd.PersistentFlags().BoolVarP(&frontRun, "frontRun", "f", false, "frontRun")
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	viper.SetConfigFile("config.yml")
 	if err := viper.ReadInConfig(); err != nil {
