@@ -14,9 +14,9 @@ const (
 	UniSwapV2FactoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
 
 	//test net
-	WBNBAddressTest           = "0x1e33833a035069f42d68D1F53b341643De1C018D"
-	PancakeRouterAddressTest  = "0x07d090e7FcBC6AFaA507A3441C7c5eE507C457e6"
-	PancakeFactoryAddressTest = "0xd417A0A4b65D24f5eBD0898d9028D92E3592afCC"
+	WBNBAddressTest           = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"
+	PancakeRouterAddressTest  = "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3"
+	PancakeFactoryAddressTest = "0xb7926c0430afb07aa7defde6da862ae0bde767bc"
 
 	//eth test
 	WETHAddressTest             = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -26,7 +26,7 @@ const (
 
 const (
 	BscRpcAddr     = "https://bsc-dataseed.binance.org/"
-	BscRpcAddrTest = "https://data-seed-prebsc-2-s3.binance.org:8545/"
+	BscRpcAddrTest = "https://data-seed-prebsc-1-s1.binance.org:8545"
 	EthRpcAddr     = "https://main-light.eth.linkpool.io/"
 	EthRpcAddrTest = "https://main-light.eth.linkpool.io/"
 )
