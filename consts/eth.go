@@ -6,6 +6,8 @@ import (
 
 const (
 	WBNBAddress           = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+	USDTAddressBSC        = "0x55d398326f99059fF775485246999027B3197955"
+	BUSDAddress           = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
 	PancakeRouterAddress  = "0x10ED43C718714eb63d5aA57B78B54704E256024E"
 	PancakeFactoryAddress = "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73"
 
@@ -14,9 +16,11 @@ const (
 	UniSwapV2FactoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
 
 	//test net
-	WBNBAddressTest           = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"
-	PancakeRouterAddressTest  = "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3"
-	PancakeFactoryAddressTest = "0xb7926c0430afb07aa7defde6da862ae0bde767bc"
+	WBNBAddressTest           = "0x0cBE3D856B6A03B4dEeCbdfBB35e834Cad1aA50D"
+	USDTAddressBSCTest        = "0x12cf459B5d90fA6D697e245e1d0CFAe2068fb766"
+	BUSDAddressTest           = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
+	PancakeRouterAddressTest  = "0x220b01F9192A435F3Fc33fD5F0b205BCec3d3fA1"
+	PancakeFactoryAddressTest = "0x13700dAe4b84E546D7e493BA1d1FA15f190dB10E"
 
 	//eth test
 	WETHAddressTest             = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -65,5 +69,13 @@ var (
 		ChainTypeBsc:     common.HexToAddress(PancakeRouterAddress),
 		ChainTypeEthTest: common.HexToAddress(UniSwapV2RouterAddressTest),
 		ChainTypeBscTest: common.HexToAddress(PancakeRouterAddressTest),
+	}
+	USDTContractMap = map[string]common.Address{
+		ChainTypeBsc:     common.HexToAddress(USDTAddressBSC),
+		ChainTypeBscTest: common.HexToAddress(USDTAddressBSCTest),
+	}
+	BUSDContractMap = map[string]common.Address{
+		ChainTypeBsc:     common.HexToAddress(BUSDAddress),
+		ChainTypeBscTest: common.HexToAddress(BUSDAddressTest),
 	}
 )

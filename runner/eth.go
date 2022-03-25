@@ -161,8 +161,10 @@ func (e *ethRunner) getClient(chain string) *ethclient.Client {
 	return client
 }
 
-func (e *ethRunner) SniperUniCake(chain string, frontRun bool) {
+func (e *ethRunner) SniperUniCake(chain string, frontRun bool, payToken string) {
 	wrapperTokenAddress := consts.UniSwapWrapperTokenContractMap[chain]
+	USDTAddress := consts.USDTContractMap[chain]
+	BUSDAddress := consts.BUSDContractMap[chain]
 	targetTokenAddress := common.HexToAddress(viper.GetString("targetContract"))
 	log.Printf("token address %s", targetTokenAddress)
 	factory, err := uniswap.NewUniswapV2(consts.UniSwapFactoryContractMap[chain], e.getClient(chain))
@@ -179,7 +181,15 @@ func (e *ethRunner) SniperUniCake(chain string, frontRun bool) {
 	}
 
 	interval := time.Duration(viper.GetInt64("sniperInterval"))
-	path := []common.Address{wrapperTokenAddress, targetTokenAddress}
+	var path []common.Address
+	switch payToken {
+	case "USDT":
+		path = []common.Address{wrapperTokenAddress, USDTAddress, targetTokenAddress}
+	case "BUSD":
+		path = []common.Address{wrapperTokenAddress, BUSDAddress, targetTokenAddress}
+	default:
+		path = []common.Address{wrapperTokenAddress, targetTokenAddress}
+	}
 	amountIn, _ := big.NewFloat(viper.GetFloat64("buyingBnbAmount") * params.Ether).Int(nil)
 	amountOutMin := big.NewInt(0)
 
