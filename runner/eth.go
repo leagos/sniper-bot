@@ -162,7 +162,7 @@ func (e *ethRunner) getClient(chain string) *ethclient.Client {
 	return client
 }
 
-func (e *ethRunner) SniperUniCake(chain string, mode string, payToken string) {
+func (e *ethRunner) SniperUniCake(chain string, mode string, poolType string) {
 	wrapperTokenAddress := consts.UniSwapWrapperTokenContractMap[chain]
 	USDTAddress := consts.USDTContractMap[chain]
 	BUSDAddress := consts.BUSDContractMap[chain]
@@ -177,20 +177,34 @@ func (e *ethRunner) SniperUniCake(chain string, mode string, payToken string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ethToken, err := uniswap.NewUniswapV2(wrapperTokenAddress, e.getClient(chain))
-	if err != nil {
-		log.Fatal(err)
-	}
+
+	var poolToken *uniswap.UniswapV2
+	var poolTokenAddress common.Address
 
 	interval := time.Duration(viper.GetInt64("sniperInterval"))
 	var path []common.Address
-	switch payToken {
+	switch strings.ToUpper(poolType) {
 	case "USDT":
 		path = []common.Address{wrapperTokenAddress, USDTAddress, targetTokenAddress}
+		poolToken, err = uniswap.NewUniswapV2(USDTAddress, e.getClient(chain))
+		if err != nil {
+			log.Fatal(err)
+		}
+		poolTokenAddress = USDTAddress
 	case "BUSD":
 		path = []common.Address{wrapperTokenAddress, BUSDAddress, targetTokenAddress}
+		poolToken, err = uniswap.NewUniswapV2(BUSDAddress, e.getClient(chain))
+		if err != nil {
+			log.Fatal(err)
+		}
+		poolTokenAddress = BUSDAddress
 	default:
 		path = []common.Address{wrapperTokenAddress, targetTokenAddress}
+		poolToken, err = uniswap.NewUniswapV2(wrapperTokenAddress, e.getClient(chain))
+		if err != nil {
+			log.Fatal(err)
+		}
+		poolTokenAddress = wrapperTokenAddress
 	}
 	amountIn, _ := big.NewFloat(viper.GetFloat64("buyingBnbAmount") * params.Ether).Int(nil)
 	amountOutMin := big.NewInt(0)
@@ -281,7 +295,7 @@ func (e *ethRunner) SniperUniCake(chain string, mode string, payToken string) {
 	}
 
 getPair:
-	pairAddress, err := factory.GetPair(nil, wrapperTokenAddress, targetTokenAddress)
+	pairAddress, err := factory.GetPair(nil, poolTokenAddress, targetTokenAddress)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -293,8 +307,9 @@ getPair:
 		goto getPair
 	}
 	minPoolLiquidityAdded, _ := big.NewFloat(viper.GetFloat64("minPoolLiquidityAdded") * params.Ether).Int(nil)
+
 	for {
-		balance, err := ethToken.BalanceOf(nil, pairAddress)
+		balance, err := poolToken.BalanceOf(nil, pairAddress)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -302,7 +317,7 @@ getPair:
 			log.Printf("pool liquidity %s, start to buy ------", utils.WeiToEtherFloatByDecimals(18, balance).String())
 			break
 		}
-		log.Println("pool liquidity too low:", utils.WeiToEtherFloatByDecimals(18, balance).String(), "BNB")
+		log.Println("pool liquidity too low:", utils.WeiToEtherFloatByDecimals(18, balance).String(), poolType)
 		time.Sleep(interval * time.Millisecond)
 	}
 	if slippage := viper.GetInt64("slippage"); slippage != 0 && slippage < 100 {
