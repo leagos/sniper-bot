@@ -17,8 +17,8 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 }
 var chainType string
-var frontRun bool
-var payToken string
+var mode string
+var poolType string
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -30,9 +30,9 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&chainType, "chain", "c", "bsc", "chain type")
-	rootCmd.PersistentFlags().BoolVarP(&frontRun, "frontRun", "f", false, "frontRun")
-	rootCmd.PersistentFlags().StringVarP(&payToken, "payToken", "p", "WBNB", "paytoken")
+	rootCmd.PersistentFlags().StringVarP(&chainType, "chain", "c", "bsc", "-c bsc")
+	rootCmd.PersistentFlags().StringVarP(&mode, "mode", "m", "normal", "-m f")
+	rootCmd.PersistentFlags().StringVarP(&poolType, "poolType", "p", "WBNB", "-p USDT")
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	viper.SetConfigFile("config.yml")
 	if err := viper.ReadInConfig(); err != nil {

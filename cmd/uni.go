@@ -10,7 +10,7 @@ var uniCmd = &cobra.Command{
 	Use:   "uni",
 	Short: "sniper on uniswap v2",
 	Run: func(cmd *cobra.Command, args []string) {
-		runner.NewEthRunner().SniperUniCake(chainType, frontRun, payToken)
+		runner.NewEthRunner().SniperUniCake(chainType, mode, poolType)
 	},
 }
 
