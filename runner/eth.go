@@ -218,6 +218,13 @@ func (e *ethRunner) SniperUniCake(chain string, mode string, poolType string) {
 	auth.GasLimit = viper.GetUint64("gasLimit")
 	auth.GasPrice = big.NewInt(viper.GetInt64("gasPrice") * params.GWei)
 
+	timeFormat := "2006-01-02 15:04:05"
+	startTime := viper.GetString("startTime")
+	startAt, err := time.ParseInLocation(timeFormat, startTime, time.Local)
+	if err != nil {
+		log.Fatalf("开始时间格式错误:%s", err)
+	}
+	startTimestamp := startAt.Unix()
 	//抢跑模式
 	if mode == "f" {
 		targetToken, err := uniswap.NewUniswapV2(targetTokenAddress, e.getClient(chain))
@@ -230,6 +237,14 @@ func (e *ethRunner) SniperUniCake(chain string, mode string, poolType string) {
 		}
 		log.Printf("Init token balance %s", utils.WeiToEtherFloatByDecimals(9, tokenBalance).String())
 		for {
+			//到了指定时间才开始发起交易
+			block, _ := e.getClient(chain).BlockByNumber(context.Background(), nil)
+			log.Printf("当前区块时间：%s,%d", time.Unix(int64(block.Time()), 0).In(time.Local).Format(timeFormat), block.Time())
+			if block.Time()+6 < uint64(startTimestamp) {
+				time.Sleep(interval * time.Millisecond)
+				log.Printf("未到开始时间:%s,%d", startTime, startTimestamp)
+				continue
+			}
 			nowBalance, err := targetToken.BalanceOf(nil, FromAddr)
 			if err != nil {
 				log.Fatal(err)
@@ -249,47 +264,30 @@ func (e *ethRunner) SniperUniCake(chain string, mode string, poolType string) {
 		}
 	}
 	if mode == "t" {
-		timeFormat := "2006-01-02 15:04:05"
-		startTime := viper.GetString("startTime")
-		startAt, err := time.ParseInLocation(timeFormat, startTime, time.Local)
-		if err != nil {
-			log.Fatalf("开始时间格式错误:%s", err)
-		}
-		startTimestamp := startAt.Unix()
-
 		for {
 			block, _ := e.getClient(chain).BlockByNumber(context.Background(), nil)
 			log.Printf("当前区块时间：%s,%d", time.Unix(int64(block.Time()), 0).In(time.Local).Format(timeFormat), block.Time())
 			if block.Time()+6 < uint64(startTimestamp) {
 				time.Sleep(interval * time.Millisecond)
-				log.Printf("未到开始时间:%s", startTime)
+				log.Printf("未到开始时间:%s,%d", startTime, startTimestamp)
 				continue
 			}
 			block0, _ := e.getClient(chain).BlockByNumber(context.Background(), nil)
-			log.Printf("当前区块高度 %d", block0.Number())
+			log.Printf("当前区块高度： %d,区块时间：%s", block0.Number(), time.Unix(int64(block0.Time()), 0).In(time.Local).Format(timeFormat))
 			tx, err := router.SwapExactETHForTokens(auth, amountOutMin, path, e.fromAddress, big.NewInt(time.Now().Add(2*time.Minute).Unix()))
 			if err != nil {
 				log.Fatal(err)
 			}
-			log.Printf("Transaction has been sent, tx hash: %s", tx.Hash().Hex())
+			log.Printf("交易已发送, hash: %s", tx.Hash().Hex())
 			time.Sleep(2500 * time.Millisecond)
 
 			block1, _ := e.getClient(chain).BlockByNumber(context.Background(), nil)
-			log.Printf("当前区块高度 %d", block1.Number())
+			log.Printf("当前区块高度： %d,区块时间：%s", block1.Number(), time.Unix(int64(block1.Time()), 0).In(time.Local).Format(timeFormat))
 			tx1, err := router.SwapExactETHForTokens(auth, amountOutMin, path, e.fromAddress, big.NewInt(time.Now().Add(2*time.Minute).Unix()))
-			log.Printf("Transaction 1 has been sent, tx hash: %s", tx1.Hash().Hex())
+			log.Printf("交易已发送,hash: %s", tx1.Hash().Hex())
 			if err != nil {
 				log.Fatal(err)
 			}
-			//time.Sleep(1000*time.Millisecond)
-			//
-			//block2,_ := e.getClient(chain).BlockByNumber(context.Background(),nil)
-			//log.Printf("当前区块高度 %d",block2.Number())
-			//tx2,err := router.SwapExactETHForTokens(auth, amountOutMin, path, e.fromAddress, big.NewInt(time.Now().Add(2*time.Minute).Unix()))
-			//if err != nil {
-			//	log.Fatal(err)
-			//}
-			//log.Printf("Transaction 2 has been sent, tx hash: %s", tx2.Hash().Hex())
 			return
 		}
 	}
